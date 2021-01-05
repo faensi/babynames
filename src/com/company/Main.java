@@ -9,7 +9,7 @@ public class Main
 	//Java Version
 	public static int[][] levenshtein(String firstWord, String secondWord)
 	{
-		double zeit = System.nanoTime();
+		//double zeit = System.nanoTime();
 
 		// lower case everything
 		firstWord = firstWord.toLowerCase();
@@ -48,8 +48,8 @@ public class Main
 			}
 		}
 
-		zeit = System.nanoTime() - zeit;
-		System.out.println("Time spend first LevAlgo: " + zeit);
+		//zeit = System.nanoTime() - zeit;
+		//System.out.println("Time spend first LevAlgo: " + zeit);
 
 		return distance;
 	}
@@ -147,10 +147,6 @@ public class Main
 		}
 	}
 */
-	//Optimization: contains, j<k, check half of the word for similarity,
-	// not really using the score for similarity yet
-	// (if it would be used, subtract wordlength diff, to compare similarity just on amount of same characterLength),
-	// just the matrixErrors till a point
 
 	public static void main(String[] args)
 	{
@@ -172,7 +168,7 @@ public class Main
 		for (int i = 1880, n = 0; i < tillYear; i++, n++)
 		{
 			try (BufferedReader br = new BufferedReader(new FileReader("lib/names_data/yob" + i + ".txt")))
-			//try(BufferedReader br = new BufferedReader(new FileReader("Testing.txt")))
+			//try (BufferedReader br = new BufferedReader(new FileReader("lib/names_data/testing.txt")))
 
 			{
 				while ((readLine = br.readLine()) != null)
@@ -214,29 +210,23 @@ public class Main
 
 			boolean[] alreadyUsedNames = new boolean[amountOfNamesInFile];
 			boolean boolName1CanBeUsed;
-			boolean boolName2CanBeUsed;
 
 			//Name,Geschlecht,Anzahl
 			try (BufferedWriter bwM = new BufferedWriter(new FileWriter("updatedNames/yobM" + i + ".txt"));
 				BufferedWriter bwF = new BufferedWriter(new FileWriter("updatedNames/yobF" + i + ".txt")))
 			{
 				int j = 0;
-				//bisher durch: && j<965 eingeschränkt, später entfernen
-				for (; j < amountOfNamesInFile /* && j<965 */; j++)
+				for (; j < amountOfNamesInFile; j++)
 				{   //alle Namen
 					//Resets für Variablen hier machen, um mögliche Fehlerfälle durch alte Werte zu verhindern
 					boolName1CanBeUsed = false;         //reset boolean
 
-					sumAmountSimilar = Integer.valueOf(readEntries.get(j).get(2));
+					sumAmountSimilar = Integer.parseInt(readEntries.get(j).get(2));
 
-					//
-					if(!similarNames.isEmpty())if (readEntries.get(j).get(0).charAt(0) != similarNames.charAt(0))
-					{
-						similarNames = readEntries.get(j).get(0);   //put name which gets compared into simNames
-						name1 = similarNames;
+					similarNames = readEntries.get(j).get(0);   //put name which gets compared into simNames
+					name1 = similarNames;
 
-						System.out.println("_________________________\nSimilarNames at start: " + similarNames);
-					}
+					System.out.println("_________________________\nSimilarNames at start: " + similarNames);
 
 					for (int k = j + 1; k < amountOfNamesInFile; k++)
 					{    //verglichen mit allen anderen Namen
@@ -246,11 +236,6 @@ public class Main
 						name2 = readEntries.get(k).get(0);
 
 						sameGender = readEntries.get(j).get(1);
-
-						if (!alreadyUsedNames[k])
-						{
-							boolName2CanBeUsed = true;      //isn't used atm -> maybe remove
-						}
 
 						//Falls das Wort, zu dem wir ähnliche Wörter suchen, schon benutzt wurde und wir nicht in dem Durchgang (j) sind, wo wir den Wert erst true gesetzt haben
 						// -> überspringen wir komplette Prüfungen
@@ -268,6 +253,9 @@ public class Main
 									name1))   //one word is part of the other -> they are similar -> fast way to say if we can write them in one line
 								{
 									wordIsContained = true;
+								}
+								else if (name1.charAt(0) != name2.charAt(0)){
+									continue;
 								}
 								else
 								{
@@ -311,7 +299,7 @@ public class Main
 										}
 									}
 
-									//version 2     solely levenshteinDistance without just looking at part of the chars of the smaller word
+									//version 2     solely levenshteinDistance without just looking at part of the chars of the smaller word // aus unserer Sicht schlechter
 
 									//lengthWordDifference = Math.abs(lengthWord1 - lengthWord2);       //calculate difference to subtract from score
 									//levenshteinDistance = levenshteinMat[levenshteinMat.length - 1][levenshteinMat[0].length - 1];
@@ -332,7 +320,7 @@ public class Main
 									alreadyUsedNames[j] = true;
 									similarNames += "," + readEntries.get(k).get(0);    //build simNames up
 									System.out.println("SimilarNames: " + similarNames);
-									sumAmountSimilar += Integer.valueOf(readEntries.get(k)
+									sumAmountSimilar += Integer.parseInt(readEntries.get(k)
 										.get(2)); //add the similar words occurrences to our words occurrences
 								}
 								else if (!alreadyUsedNames[j])
@@ -347,7 +335,7 @@ public class Main
 					if (j == amountOfNamesInFile - 1 && !alreadyUsedNames[amountOfNamesInFile - 1])
 					{
 						similarNames = readEntries.get(amountOfNamesInFile - 1).get(0);
-						sumAmountSimilar = Integer.valueOf(readEntries.get(amountOfNamesInFile - 1).get(2));
+						sumAmountSimilar = Integer.parseInt(readEntries.get(amountOfNamesInFile - 1).get(2));
 						sameGender = readEntries.get(amountOfNamesInFile - 1).get(1);
 						alreadyUsedNames[amountOfNamesInFile - 1] = true;
 						boolName1CanBeUsed = true;
@@ -410,20 +398,4 @@ public class Main
 		System.out.println("Taken time: " + timestop);
 
 	}
-
-	//Maybe leave it out, because it can't be used to solely exclude cases, see comment example below
-	//if ("ab".substring(0,1) == "a".substring(0,1))   //both start with the same character -> first condition for possible name similarity, starting from the front (mögliche Fehlerfälle: Marie, Rose-Marie)
-
-	//catches the mentioned case above
-    /*    if ("ab".contains("a") || "a".contains("ab"))   //one word is part of the other -> they are similar -> fast way to say if we can write them in one line
-    {
-
-    }
-        else
-    {
-
-    }
-    //There are still some duplicates listed double, maybe a boolean[] to mark already used words, so they dont get used again
-    */
-
 }
